@@ -2,6 +2,8 @@
 # Script outline to install and build kernel.
 # Author: Siddhant Jajoo.
 
+# TASKS (that were TODOs) by Martin Mauersberg
+
 set -e
 set -u
 
