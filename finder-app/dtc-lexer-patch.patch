@@ -1,0 +1,25 @@
+From 5c61ced60f363aa4c4c8c4de35d72fc5c678086b Mon Sep 17 00:00:00 2001
+From: = <=>
+Date: Wed, 27 Sep 2023 14:57:12 -0400
+Subject: [PATCH] dtc-lexer patch
+
+---
+ scripts/dtc/dtc-lexer.l | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/scripts/dtc/dtc-lexer.l b/scripts/dtc/dtc-lexer.l
+index 06c040902..0b1aa659e 100644
+--- a/scripts/dtc/dtc-lexer.l
++++ b/scripts/dtc/dtc-lexer.l
+@@ -38,7 +38,7 @@ LINECOMMENT	"//".*\n
+ #include "srcpos.h"
+ #include "dtc-parser.tab.h"
+ 
+-YYLTYPE yylloc;
++// YYLTYPE yylloc;
+ extern bool treesource_error;
+ 
+ /* CAUTION: this will stop working if we ever use yyless() or yyunput() */
+-- 
+2.34.1
+
