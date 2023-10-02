@@ -1,0 +1,1 @@
+Path is /tmp/aeld-data and file is AELD_IS_FUN The number of files are 10 and the number of matching lines are 10
