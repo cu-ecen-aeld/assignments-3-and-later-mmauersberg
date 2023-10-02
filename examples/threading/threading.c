@@ -20,7 +20,7 @@ void* threadfunc(void* thread_param)
 
     // wait before obtaining mutex
     DEBUG_LOG("waiting to obtain mutex for thread %p", thread_func_args);
-    usleep (thread_func_args->wait_to_obtain_ms);
+    usleep (thread_func_args->wait_to_obtain_ms * 1000);
 
     // obtain mutex
     DEBUG_LOG("obtaining mutex for thread %p", thread_func_args);
@@ -32,7 +32,7 @@ void* threadfunc(void* thread_param)
 
     // wait for defined hold time
     DEBUG_LOG("waiting to release mutex for thread %p", thread_func_args);
-    usleep (thread_func_args->wait_to_release_ms);
+    usleep (thread_func_args->wait_to_release_ms * 1000);
 
     // release mutex
     DEBUG_LOG("releasing mutex for thread %p", thread_func_args);
