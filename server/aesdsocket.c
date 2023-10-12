@@ -52,12 +52,6 @@ void sigint_handler(int s) {
     done = 1;
 }
 
-void sigchld_handler(int s) {
-    int saved_errno = errno;
-    while (waitpid(-1,NULL, WNOHANG) > 0) {}
-    errno = saved_errno;
-}
-
 /* get sockaddr for ipv4 or ipv6 */
 void *get_in_addr(struct sockaddr *sa) {
     if (sa->sa_family == AF_INET){
