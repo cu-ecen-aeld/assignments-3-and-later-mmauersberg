@@ -28,6 +28,7 @@
 #define BUF_SIZE 1024
 #define OUTFILE "/var/tmp/aesdsocketdata"
 
+/* volatile atomic signal for done */
 volatile sig_atomic_t done = 0;
 
 /* structure for thread data */
@@ -35,7 +36,6 @@ struct th_data  {
     int socket_fd;  // socket file descriptor
     char* addr;     // socket peer address
 };
-
 
 /************************************************************************************
  * ----------------------  handlers for SIGINT and SIGTERM ----------------------
@@ -71,14 +71,13 @@ void *get_in_addr(struct sockaddr *sa) {
  * **********************************************************************************/
 void *connection_handler (void *socket_info)
 {
+    // get socket from socket_info parameter
     struct th_data socket_data = *(struct th_data*) socket_info;
-
-
     int sock = socket_data.socket_fd;
 
+    // read from socket and write to file
     ssize_t nread;
     char buf[BUF_SIZE] = {0};
-
     FILE *fp = fopen(OUTFILE, "a+b");
     if (fp == NULL) {
         perror("fopen");
@@ -94,7 +93,6 @@ void *connection_handler (void *socket_info)
             fseek(fp, 0, SEEK_SET);
             for (int i = 0; i < nread; i++){
                 if (buf[i] == '\n') {
-                    // printf("got newline\n");
                     while (1){
                         char c = fgetc(fp);
                         if (c == EOF){
@@ -108,8 +106,9 @@ void *connection_handler (void *socket_info)
     } while(nread != 0 && done ==0);
     fclose(fp);
 
+    // free socket_info (which was malloc'd when the thread was created in main)
     free(socket_info);
-    syslog(LOG_USER, "Closed connection from %s\n", socket_data.addr);
+    syslog(LOG_USER, "closed connection from %s\n", socket_data.addr);
 
     return 0;
 }
@@ -163,7 +162,7 @@ int main(int argc, char *argv[]){
     int yes = 1;
     socklen_t sin_size;
     struct sockaddr_storage sin_addr;
-    char s[INET6_ADDRSTRLEN];
+    char addr_string[INET6_ADDRSTRLEN];
     int retval;
 
     /* set hints (connection parameters) */
@@ -264,19 +263,18 @@ int main(int argc, char *argv[]){
         }
 
         // get address for incoming connection
-        inet_ntop(sin_addr.ss_family, get_in_addr((struct sockaddr*)&sin_addr), s, sizeof(s));
-        syslog(LOG_USER, "Accepted connection from %s\n", s);
+        inet_ntop(sin_addr.ss_family, get_in_addr((struct sockaddr*)&sin_addr), addr_string, sizeof(addr_string));
+        syslog(LOG_USER, "accepted connection from %s\n", addr_string);
 
         // initialize thread to handle connection
         pthread_t connection_thread;
         struct th_data *socket_data = malloc(sizeof(struct th_data));
         socket_data->socket_fd = new_fd;
-        socket_data->addr = s;
+        socket_data->addr = addr_string;
 
         if (pthread_create(&connection_thread, NULL, connection_handler, (void*) socket_data)) {
-            syslog(LOG_ERR,"could not create thread for connection from %s\n", s);
+            syslog(LOG_ERR,"could not create thread for connection from %s\n", addr_string);
         }
-     
     }
 
     /************************************************************************************
