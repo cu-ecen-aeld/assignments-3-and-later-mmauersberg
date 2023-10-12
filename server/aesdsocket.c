@@ -76,26 +76,26 @@ void *connection_handler (void *socket_info)
     int sock = socket_data.socket_fd;
 
     // read from socket and write to file
-    ssize_t nread;
+    ssize_t sockRead;
     char buf[BUF_SIZE] = {0};
-    FILE *fp = fopen(OUTFILE, "a+b");
+    FILE *fp = fopen(OUTFILE, "a+");
     if (fp == NULL) {
         perror("fopen");
         exit(-1);
     }
     do {
-        nread = recv(sock, &buf, BUF_SIZE, 0);
-        if (nread == -1) {
+        sockRead = recv(sock, &buf, BUF_SIZE, 0);
+        if (sockRead == -1) {
             perror("recv");
             exit(-1);
         } else {
-            fwrite(&buf, 1, nread, fp);
+            fwrite(&buf, 1, sockRead, fp);
             fseek(fp, 0, SEEK_SET);
-            for (int i = 0; i < nread; i++){
+            for (int i = 0; i < sockRead; i++){
                 if (buf[i] == '\n') {
                     while (1){
                         char c = fgetc(fp);
-                        if (c == EOF){
+                        if (c == EOF) {
                             break;
                         }
                         send(sock, &c, 1, 0);
@@ -103,7 +103,7 @@ void *connection_handler (void *socket_info)
                 }
             }
         }
-    } while(nread != 0 && done ==0);
+    } while(sockRead != 0 && done ==0);
     fclose(fp);
 
     // free socket_info (which was malloc'd when the thread was created in main)
