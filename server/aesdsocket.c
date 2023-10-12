@@ -30,6 +30,13 @@
 
 volatile sig_atomic_t done = 0;
 
+/* structure for thread data */
+struct th_data  {
+    int socket_fd;  // socket file descriptor
+    char* addr;     // socket peer address
+};
+
+
 /************************************************************************************
  * ----------------------  handlers for SIGINT and SIGTERM ----------------------
  * **********************************************************************************/
@@ -62,9 +69,12 @@ void *get_in_addr(struct sockaddr *sa) {
 /************************************************************************************
  * ----------------------  connection handler  ----------------------
  * **********************************************************************************/
-void *connection_handler (void *socket_desc)
+void *connection_handler (void *socket_info)
 {
-    int sock = *(int*)socket_desc;
+    struct th_data socket_data = *(struct th_data*) socket_info;
+
+
+    int sock = socket_data.socket_fd;
 
     ssize_t nread;
     char buf[BUF_SIZE] = {0};
@@ -98,9 +108,8 @@ void *connection_handler (void *socket_desc)
     } while(nread != 0 && done ==0);
     fclose(fp);
 
-    free(socket_desc);
-    printf("closed Connection\n");
-    syslog(LOG_USER, "Closed connection\n");
+    free(socket_info);
+    syslog(LOG_USER, "Closed connection from %s\n", socket_data.addr);
 
     return 0;
 }
@@ -243,6 +252,7 @@ int main(int argc, char *argv[]){
     printf("server: waiting for connections...\n");
     syslog(LOG_USER, "waiting for connections...\n");
 
+    // accept connections until done (as set by SIGINT or SIGTERM)
     while(done == 0){
         sin_size = sizeof(sin_addr);
 
@@ -259,15 +269,19 @@ int main(int argc, char *argv[]){
 
         // initialize thread to handle connection
         pthread_t connection_thread;
-        int *socket_desc = malloc(1);
-        *socket_desc = new_fd;
-        if (pthread_create(&connection_thread, NULL, connection_handler, (void*) socket_desc)) {
+        struct th_data *socket_data = malloc(sizeof(struct th_data));
+        socket_data->socket_fd = new_fd;
+        socket_data->addr = s;
+
+        if (pthread_create(&connection_thread, NULL, connection_handler, (void*) socket_data)) {
             syslog(LOG_ERR,"could not create thread for connection from %s\n", s);
         }
      
     }
 
-    // Cleanup.
+    /************************************************************************************
+     * CLEAN UP AND CLOSE SOCKET
+     * **********************************************************************************/
     remove(OUTFILE);
     close(sockfd);
 
