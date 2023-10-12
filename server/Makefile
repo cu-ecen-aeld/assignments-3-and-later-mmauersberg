@@ -1,5 +1,5 @@
 CC=$(CROSS_COMPILE)gcc
-CFLAGS=-g -Wall -lpthread
+CFLAGS=-g -Wall -pthread
 
 .PHONY: clean aesdsocket
 
