@@ -272,7 +272,7 @@ int main(int argc, char *argv[]){
         socket_data->socket_fd = new_fd;
         socket_data->addr = addr_string;
 
-        if (pthread_create(&connection_thread, NULL, connection_handler, (void*) socket_data)) {
+        if (pthread_create(&connection_thread, NULL, *connection_handler, (void*) socket_data)) {
             syslog(LOG_ERR,"could not create thread for connection from %s\n", addr_string);
         }
     }
