@@ -111,16 +111,13 @@ void *connection_handler (void *socket_info)
  * ----------------------  MAIN ----------------------
  * **********************************************************************************/
 int main(int argc, char *argv[]){
+
+    int isDaemon = 0;
+
     if (argc > 1){
         // if we have arguments, check for -d
         if (strncmp(argv[1], "-d", strlen("-d")) == 0){
-            // if daemon mode is specified, fork the process and exit parent
-            pid_t child_pid = fork();
-            if (child_pid == -1) { perror("fork"); exit(-1);}
-            if (child_pid != 0) {
-                // exit parent
-                exit(0);
-            }
+            isDaemon = 1;
         }else{
             fprintf(stderr,"unknown arguments - ignored\n");
         }
@@ -225,6 +222,20 @@ int main(int argc, char *argv[]){
 
     // free servinfo allocation
     freeaddrinfo(servinfo);
+
+    /************************************************************************************
+     * RUN AS DAEMON IF REQUIRED
+     * **********************************************************************************/
+
+    if(isDaemon==1) {
+        // if daemon mode is specified, fork the process and exit parent
+        pid_t child_pid = fork();
+        if (child_pid == -1) { perror("fork"); exit(-1);}
+        if (child_pid != 0) {
+            // exit parent
+            exit(0);
+        }
+    }
 
     /************************************************************************************
      * WAIT FOR CONNECTION AND HANDLE CONNECTION IN THREAD
