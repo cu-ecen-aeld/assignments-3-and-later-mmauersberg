@@ -1,7 +1,7 @@
 CC=$(CROSS_COMPILE)gcc
-CFLAGS=-g -Wall -pthread
+CFLAGS=-g -Wall -Werror -pthread
 
-.PHONY: clean aesdsocket
+.PHONY: all clean aesdsocket
 
 all: aesdsocket
 default: aesdsocket
