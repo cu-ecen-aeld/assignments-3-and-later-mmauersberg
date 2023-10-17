@@ -88,7 +88,7 @@ void *connection_handler (void *socket_info)
             for (int i = 0; i < sockRead; i++){
                 if (buf[i] == '\n') {
                     while (1){
-                        char c = fgetc(fp);
+                        int c = fgetc(fp);
                         if (c == EOF) {
                             break;
                         }
