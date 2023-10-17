@@ -25,7 +25,7 @@
 
 #define SOCKET_PORT "9000"
 #define SOCKET_BACKLOG 10
-#define BUF_SIZE 1024
+#define BUF_SIZE 512
 #define OUTFILE "/var/tmp/aesdsocketdata"
 
 /* volatile atomic signal for done */
@@ -72,7 +72,7 @@ void *connection_handler (void *socket_info)
     // read from socket and write to file
     ssize_t sockRead;
     char buf[BUF_SIZE] = {0};
-    FILE *fp = fopen(OUTFILE, "a+");
+    FILE *fp = fopen(OUTFILE, "ab+");
     if (fp == NULL) {
         perror("fopen");
         exit(-1);
@@ -88,7 +88,7 @@ void *connection_handler (void *socket_info)
             for (int i = 0; i < sockRead; i++){
                 if (buf[i] == '\n') {
                     while (1){
-                        char c = fgetc(fp);
+                        int c = fgetc(fp);
                         if (c == EOF) {
                             break;
                         }
